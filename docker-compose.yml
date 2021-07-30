@@ -1,0 +1,87 @@
+version: "3"
+services:
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  
+  rabbitmq:
+    image: docker.io/bitnami/rabbitmq:3.8
+    ports:
+      - '4369:4369'
+      - '5672:5672'
+      - '25672:25672'
+      - '15672:15672'
+    environment:
+      - RABBITMQ_SECURE_PASSWORD=no
+    volumes:
+      - 'rabbitmq_data:/bitnami'
+      
+  kafka:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+      - '9093:9093'      
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+    depends_on:
+      - zookeeper
+      
+  generator:
+    build: ./generator
+    ports:
+      - '8081:8080'
+    depends_on:
+      - rabbitmq
+      - kafka
+      
+  connector:
+    build: ./kafka
+    ports:
+      - '9094:9092'
+      - '9095:9093'
+    depends_on:
+      - kafka
+      - zookeeper
+      - rabbitmq
+      - generator
+      
+#  sink:
+#    build: ./sink
+#    environment:
+#      - KAFKA_BROKER_ID=2
+#    ports:
+#      - '9096:9092'
+#      - '9097:9093'
+#    depends_on:
+#      - kafka
+#      - zookeeper
+#      - rabbitmq
+#      - generator
+      
+      
+# docker run -p 22022:22 -p 8020:8020 -p 50010:50010 -p 50020:50020 -p 50070:50070 -p 50075:50075 --network=kafka-image_default -it mdouchement/hdfs
+#  hdfs:
+#    image: 'mdouchement/hdfs'
+#    ports:
+#      - '22022:22'
+#      - '8020:8020'
+#      - '50010:50010'
+#      - '50020:50020'
+#      - '50070:50070'
+#      - '50075:50075'
+      
+volumes:
+  rabbitmq_data:
+    driver: local
+    
