@@ -9,14 +9,21 @@ services:
       - '50020:50020'
       - '50070:50070'
       - '50075:50075'
-      
+
+  springstream:
+    build: ./springstream
+    depends_on:
+      - rabbitmq
+      - kafka
+      - hdfs
+
   zookeeper:
     image: 'bitnami/zookeeper:latest'
     ports:
       - '2181:2181'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
-  
+
   rabbitmq:
     image: docker.io/bitnami/rabbitmq:3.8
     ports:
@@ -28,12 +35,12 @@ services:
       - RABBITMQ_SECURE_PASSWORD=no
     volumes:
       - 'rabbitmq_data:/bitnami'
-      
+
   kafka:
     image: 'bitnami/kafka:latest'
     ports:
       - '9092:9092'
-      - '9093:9093'      
+      - '9093:9093'
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
