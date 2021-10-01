@@ -1,4 +1,4 @@
-# Pipline for streaming data from rabbitMQ to HDFS
+# Pipeline for streaming data from rabbitMQ to HDFS
 
 ## For running stream use:
 docker-compose up -d
@@ -7,6 +7,6 @@ docker-compose up -d
 docker-compose down
 
 ## The compose include following apps: 
-1) Generator - simple java app to generate test data to RabbitMQ
-2) Connector - source and sink connectors to read data from RabbitMQ to Kafka and write data from kafka to HDFS
+1) Containers with RabbitMQ and Kafka
+2) Pipeline - container with stream from RabbitMQ to Kafka and from Kafka to HDFS
 3) HDFS - container with HDFS
